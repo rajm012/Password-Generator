@@ -22,19 +22,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 localStorage.setItem('darkMode', 'disabled');
             }
         });
-        
-        // Copy button functionality
-        new ClipboardJS('#copy-btn');
-        
-        document.getElementById('copy-btn').addEventListener('click', function() {
-            const originalText = this.innerHTML;
-            this.innerHTML = '<i class="fas fa-check"></i> Copied!';
-            setTimeout(() => {
-                this.innerHTML = originalText;
-            }, 2000);
-        });
-
-
     // Initialize form fields based on password type
     const passwordTypeRadios = document.querySelectorAll('input[name="password_type"]');
     if (passwordTypeRadios.length > 0) {
