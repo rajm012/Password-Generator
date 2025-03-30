@@ -3,156 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Password Generator</title>
+    <title>Secure Password Generator</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js">
     <link rel="stylesheet" href="/static/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js"></script>
-    <style>
-        #passphrase-modal {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            z-index: 1000;
-            width: 80%;
-            max-width: 400px;
-        }
-        #passphrase-content {
-            font-size: 1.2rem;
-            margin: 1rem 0;
-            padding: 1rem;
-            background: #f5f5f5;
-            word-break: break-word;
-            border-radius: 4px;
-        }
-        #debug-console {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            background: #333;
-            color: white;
-            padding: 10px;
-            width: 100%;
-            max-height: 200px;
-            overflow-y: auto;
-            font-family: monospace;
-            display: none;
-        }
-    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🔒 Password Generator</h1>
-        <button id="toggle-debug" style="position: absolute; top: 10px; right: 10px;">Toggle Debug</button>
-        
-        <form method="POST" id="password-form">
-            {{ form.hidden_tag() }}
-            
-            <div class="form-group">
-                <label>{{ form.password_type.label }}</label>
-                {{ form.password_type }}
+    <header>
+        <div class="container header-content">
+            <div class="logo">
+                <i class="fas fa-lock"></i>
+                <span>SecurePassGen</span>
             </div>
-            
-            <div class="form-group">
-                <label>{{ form.strength_level.label }}</label>
-                {{ form.strength_level }}
-            </div>
-            
-            <div id="password-options" class="form-group">
-                <label id="length-label">{{ form.length.label }}</label>
-                {{ form.length }}
-                
-                <div class="checkbox-group">
-                    {{ form.use_digits }}
-                    <label for="use_digits">{{ form.use_digits.label.text }}</label>
-                </div>
-                
-                <div class="checkbox-group">
-                    {{ form.use_symbols }}
-                    <label for="use_symbols">{{ form.use_symbols.label.text }}</label>
-                </div>
-            </div>
-            
-            {{ form.submit(class="btn") }}
-        </form>
+            <button id="dark-mode-toggle" class="dark-mode-toggle">
+                <i class="fas fa-moon"></i>
+                <span>Dark Mode</span>
+            </button>
+        </div>
+    </header>
 
-        {% if password %}
-        <div class="result-container">
-            <h2>Generated {% if password_type == 'passphrase' %}Passphrase{% else %}Password{% endif %}</h2>
-            <div class="password-display">
-                <span id="password">{{ password }}</span>
-                <button id="copy-btn" class="btn" data-clipboard-target="#password">Copy</button>
+    <main>
+        <div class="container">
+            <div class="card">
+                <h1><i class="fas fa-key"></i> Secure Password Generator</h1>
+                
+                <form method="POST" id="password-form">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="form-group">
+                        <label>{{ form.password_type.label }}</label>
+                        {{ form.password_type(class="form-control") }}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>{{ form.strength_level.label }}</label>
+                        {{ form.strength_level(class="form-control") }}
+                    </div>
+                    
+                    <div id="password-options" class="form-group">
+                        <label id="length-label">{{ form.length.label }}</label>
+                        {{ form.length(class="form-range") }}
+                        
+                        <div class="checkbox-group">
+                            {{ form.use_digits(class="form-check-input") }}
+                            <label for="use_digits">{{ form.use_digits.label.text }}</label>
+                        </div>
+                        
+                        <div class="checkbox-group">
+                            {{ form.use_symbols(class="form-check-input") }}
+                            <label for="use_symbols">{{ form.use_symbols.label.text }}</label>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn">
+                        <i class="fas fa-bolt"></i> Generate Password
+                    </button>
+                </form>
             </div>
             
-            <div class="password-info">
-                <!-- ... [rest of your info display] ... -->
+            {% if password %}
+            <div class="card result-container">
+                <h2><i class="fas fa-lock-open"></i> Generated Password</h2>
+                <div class="password-display">
+                    <span id="password">{{ password }}</span>
+                    <button id="copy-btn" class="btn" data-clipboard-target="#password">
+                        <i class="far fa-copy"></i> Copy
+                    </button>
+                </div>
+                
+                <div class="password-info">
+                    <div class="info-item">
+                        <span class="label">Strength:</span>
+                        <span class="value strength-{{ strength.lower() }}">{{ strength }}</span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="label">Entropy:</span>
+                        <span class="value">{{ entropy }} bits</span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="label">Crack Time:</span>
+                        <span class="value">{{ crack_time }}</span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="label">Health Check:</span>
+                        <span class="value">{{ health_report }}</span>
+                    </div>
+                    
+                    {% if breached %}
+                    <div class="info-item breached">
+                        <span class="label"><i class="fas fa-exclamation-triangle"></i> Security Alert:</span>
+                        <span class="value">This password has been breached in previous data leaks!</span>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                {% if qr_code %}
+                <div class="qr-container">
+                    <h3><i class="fas fa-qrcode"></i> QR Code</h3>
+                    <img src="data:image/png;base64,{{ qr_code }}" alt="Password QR Code">
+                    <p>Scan to copy password to mobile device</p>
+                </div>
+                {% endif %}
+                
+                <button id="generate-report" class="btn">
+                    <i class="fas fa-file-pdf"></i> Generate PDF Report
+                </button>
+            </div>
+            {% endif %}
+            
+            <div class="card live-analysis">
+                <h2><i class="fas fa-chart-line"></i> Live Password Analysis</h2>
+                <input type="text" id="live-password" placeholder="Type to analyze...">
+                <div id="live-results" class="password-info">
+                    <div class="info-item">
+                        <span class="label">Strength:</span>
+                        <span class="value" id="live-strength">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Entropy:</span>
+                        <span class="value" id="live-entropy">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Health:</span>
+                        <span class="value" id="live-health">-</span>
+                    </div>
+                </div>
             </div>
         </div>
-        {% endif %}
-    </div>
+    </main>
 
-    <!-- Passphrase Modal -->
-    <div id="passphrase-modal">
-        <h3>Your Passphrase</h3>
-        <p id="passphrase-content"></p>
-        <button onclick="copyPassphrase()">Copy</button>
-        <button onclick="closeModal()">Close</button>
-    </div>
-
-    <!-- Debug Console -->
-    <div id="debug-console">
-        <h4>Debug Console</h4>
-        <div id="debug-output"></div>
-    </div>
+    <footer>
+        <div class="container footer-content">
+            <div class="social-links">
+                <a href="#"><i class="fab fa-github"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-linkedin"></i></a>
+            </div>
+            <p class="copyright">© 2025 SecurePassGen. All rights reserved.</p>
+        </div>
+    </footer>
 
     <script src="/static/script.js"></script>
-    <script>
-        // Debugging
-        console.log("Page loaded");
-        console.log("Password type:", "{{ password_type }}");
-        console.log("Password:", "{{ password }}");
-
-        function logDebug(message) {
-            const debugOutput = document.getElementById('debug-output');
-            debugOutput.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${message}</div>`;
-            debugOutput.scrollTop = debugOutput.scrollHeight;
-        }
-
-        document.getElementById('toggle-debug').addEventListener('click', function() {
-            const console = document.getElementById('debug-console');
-            console.style.display = console.style.display === 'none' ? 'block' : 'none';
-        });
-
-        // Passphrase modal handling
-        {% if password_type == 'passphrase' and password %}
-        logDebug("Passphrase detected, showing modal");
-        const modal = document.getElementById('passphrase-modal');
-        const passphrase = "{{ password }}";
-        
-        modal.style.display = 'block';
-        document.getElementById('passphrase-content').textContent = passphrase;
-        
-        function copyPassphrase() {
-            navigator.clipboard.writeText(passphrase)
-                .then(() => {
-                    logDebug("Passphrase copied to clipboard");
-                    alert("Copied to clipboard!");
-                })
-                .catch(err => {
-                    logDebug("Copy failed: " + err);
-                    alert("Copy failed!");
-                });
-        }
-        
-        function closeModal() {
-            modal.style.display = 'none';
-            logDebug("Modal closed");
-        }
-        {% endif %}
-    </script>
 </body>
 </html>

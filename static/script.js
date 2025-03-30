@@ -1,48 +1,52 @@
-document.addEventListener('DOMContentLoaded', function() {
-    // Dark mode toggle
-    console.log("DOM fully loaded");
-    const darkModeToggle = document.getElementById('toggle-dark');
-    darkModeToggle.addEventListener('click', () => {
-        document.body.classList.toggle('dark-mode');
-        localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
-    });
-
-    // Initialize dark mode from localStorage
-    if (localStorage.getItem('darkMode') === 'true') {
-        document.body.classList.add('dark-mode');
-    }
-
-    // Clipboard copy
-    if (document.getElementById('copy-btn')) {
-        new ClipboardJS('#copy-btn');
-        document.getElementById('copy-btn').addEventListener('click', () => {
-            alert('Password copied to clipboard! Clipboard will clear in 10 seconds.');
-            setTimeout(() => navigator.clipboard.writeText(''), 10000);
+document.addEventListener('DOMContentLoaded', function () {
+    
+        // Dark mode toggle
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        const body = document.body;
+        
+        // Check for saved user preference or use system preference
+        if (localStorage.getItem('darkMode') === 'enabled' || 
+            (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            body.classList.add('dark-mode');
+            darkModeToggle.innerHTML = '<i class="fas fa-sun"></i><span>Light Mode</span>';
+        }
+        
+        darkModeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            
+            if (body.classList.contains('dark-mode')) {
+                darkModeToggle.innerHTML = '<i class="fas fa-sun"></i><span>Light Mode</span>';
+                localStorage.setItem('darkMode', 'enabled');
+            } else {
+                darkModeToggle.innerHTML = '<i class="fas fa-moon"></i><span>Dark Mode</span>';
+                localStorage.setItem('darkMode', 'disabled');
+            }
         });
-    }
+        
+        // Copy button functionality
+        new ClipboardJS('#copy-btn');
+        
+        document.getElementById('copy-btn').addEventListener('click', function() {
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-check"></i> Copied!';
+            setTimeout(() => {
+                this.innerHTML = originalText;
+            }, 2000);
+        });
+
 
     // Initialize form fields based on password type
     const passwordTypeRadios = document.querySelectorAll('input[name="password_type"]');
-    
-    // Set initial state
-    const initialType = document.querySelector('input[name="password_type"]:checked').value;
-    updateFormFields(initialType);
-    console.log(`Initial type: ${initialType}`);
-    // Update on change
+    if (passwordTypeRadios.length > 0) {
+        const initialType = document.querySelector('input[name="password_type"]:checked')?.value || "password";
+        updateFormFields(initialType);
 
-    passwordTypeRadios.forEach(radio => {
-        radio.addEventListener('change', function() {
-            updateFormFields(this.value);
+        passwordTypeRadios.forEach(radio => {
+            radio.addEventListener('change', function () {
+                updateFormFields(this.value);
+            });
         });
-    });
-
-    // Update on type change
-    document.querySelectorAll('input[name="password_type"]').forEach(radio => {
-        radio.addEventListener('change', function() {
-            console.log(`Password type changed to: ${this.value}`);
-            updateFormFields(this.value);
-        });
-    });
+    }
 
     function updateFormFields(type) {
         console.log(`Updating form for type: ${type}`);
@@ -52,7 +56,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const symbolsCheckbox = document.getElementById('use_symbols');
 
         if (type === 'passphrase') {
-            console.log("Configuring for passphrase");
             lengthLabel.textContent = 'Number of Words (3-6)';
             lengthInput.min = 3;
             lengthInput.max = 6;
@@ -62,7 +65,6 @@ document.addEventListener('DOMContentLoaded', function() {
             digitsCheckbox.checked = false;
             symbolsCheckbox.checked = false;
         } else {
-            console.log("Configuring for password");
             lengthLabel.textContent = 'Password Length (8-64)';
             lengthInput.min = 8;
             lengthInput.max = 64;
@@ -72,30 +74,21 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-
-    // Generate PDF report
-    if (document.getElementById('generate-report')) {
-        document.getElementById('generate-report').addEventListener('click', () => {
-            const password = document.getElementById('password').textContent;
-            const strength = document.querySelector('.strength').textContent;
-            const entropy = document.querySelectorAll('.info-item')[1].querySelector('.value').textContent;
-            const crackTime = document.querySelectorAll('.info-item')[2].querySelector('.value').textContent;
-            const healthReport = document.querySelectorAll('.info-item')[3].querySelector('.value').textContent;
+    // Generate PDF Report
+    const generateReportBtn = document.getElementById('generate-report');
+    if (generateReportBtn) {
+        generateReportBtn.addEventListener('click', () => {
+            const password = document.getElementById('password')?.textContent || "";
+            const strength = document.querySelector('.strength')?.textContent || "";
+            const entropy = document.querySelectorAll('.info-item')[1]?.querySelector('.value')?.textContent || "";
+            const crackTime = document.querySelectorAll('.info-item')[2]?.querySelector('.value')?.textContent || "";
+            const healthReport = document.querySelectorAll('.info-item')[3]?.querySelector('.value')?.textContent || "";
             const breached = document.querySelector('.breached') !== null;
 
             fetch('/generate-report', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    password,
-                    strength,
-                    entropy,
-                    crack_time: crackTime,
-                    health_report: healthReport,
-                    breached
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password, strength, entropy, crack_time: crackTime, health_report: healthReport, breached })
             })
             .then(response => response.blob())
             .then(blob => {
@@ -114,12 +107,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Live password analysis
+    // Live Password Analysis
     const livePasswordInput = document.getElementById('live-password');
     if (livePasswordInput) {
-        livePasswordInput.addEventListener('input', function() {
+        livePasswordInput.addEventListener('input', function () {
             const password = this.value;
-            if (password.length === 0) {
+            if (!password) {
                 document.getElementById('live-strength').textContent = '-';
                 document.getElementById('live-entropy').textContent = '-';
                 document.getElementById('live-health').textContent = '-';
@@ -128,9 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             fetch('/live-analysis', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ password })
             })
             .then(response => response.json())
@@ -140,9 +131,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('live-entropy').textContent = data.entropy + ' bits';
                 document.getElementById('live-health').textContent = data.health_report;
             })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+            .catch(error => console.error('Error:', error));
         });
     }
 });
