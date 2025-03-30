@@ -1,0 +1,174 @@
+:root {
+    --bg-color: #f5f5f5;
+    --text-color: #333;
+    --primary-color: #4a6fa5;
+    --secondary-color: #6c757d;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --card-bg: #fff;
+    --border-color: #ddd;
+}
+
+.dark-mode {
+    --bg-color: #222;
+    --text-color: #f5f5f5;
+    --primary-color: #6c8fc7;
+    --secondary-color: #8e9ba4;
+    --card-bg: #333;
+    --border-color: #444;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    margin: 0;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: var(--card-bg);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+h1, h2, h3 {
+    color: var(--primary-color);
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input[type="text"],
+input[type="number"],
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--card-bg);
+    color: var(--text-color);
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+}
+
+.checkbox-group input {
+    margin-right: 10px;
+}
+
+.btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.btn:hover {
+    background-color: #3a5a8f;
+}
+
+.result-container {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: var(--bg-color);
+    border-radius: 8px;
+}
+
+.password-display {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.password-display span {
+    font-family: monospace;
+    font-size: 1.5em;
+    margin-right: 15px;
+    word-break: break-all;
+}
+
+.info-item {
+    margin-bottom: 10px;
+    display: flex;
+}
+
+.label {
+    font-weight: bold;
+    min-width: 120px;
+}
+
+.value {
+    flex-grow: 1;
+}
+
+.strength-weak {
+    color: var(--danger-color);
+}
+
+.strength-medium {
+    color: var(--warning-color);
+}
+
+.strength-strong {
+    color: var(--success-color);
+}
+
+.breached {
+    color: var(--danger-color);
+}
+
+.qr-container {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.qr-container img {
+    max-width: 200px;
+    height: auto;
+}
+
+.live-analysis {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: var(--bg-color);
+    border-radius: 8px;
+}
+
+#live-password {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    font-size: 16px;
+}
+
+.dark-mode-toggle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+    color: var(--text-color);
+}
