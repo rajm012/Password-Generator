@@ -3,53 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Password Generator</title>
+    <title>Password Generator</title>
     <link rel="stylesheet" href="/static/style.css">
     <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js"></script>
     <style>
-        /* Simple Modal Styles */
         #passphrase-modal {
-            display: none; 
-            position: fixed; 
-            top: 50%; 
-            left: 50%; 
-            transform: translate(-50%, -50%); 
-            background: white; 
-            padding: 2rem; 
-            border-radius: 8px; 
-            box-shadow: 0 0 20px rgba(0,0,0,0.5); 
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
             z-index: 1000;
-            max-width: 90%;
-            width: 400px;
+            width: 80%;
+            max-width: 400px;
         }
-        
         #passphrase-content {
-            font-size: 1.2rem; 
-            margin: 1rem 0; 
-            padding: 1rem; 
+            font-size: 1.2rem;
+            margin: 1rem 0;
+            padding: 1rem;
             background: #f5f5f5;
-            word-break: break-all;
+            word-break: break-word;
             border-radius: 4px;
         }
-        
-        #passphrase-modal button {
-            padding: 0.5rem 1rem;
-            background: #4a6fa5;
+        #debug-console {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            background: #333;
             color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        
-        #passphrase-modal button:hover {
-            background: #3a5a8f;
+            padding: 10px;
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            display: none;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🔒 Advanced Password Generator</h1>
-        <button id="toggle-dark" class="dark-mode-toggle">🌓 Toggle Dark Mode</button>
+        <h1>🔒 Password Generator</h1>
+        <button id="toggle-debug" style="position: absolute; top: 10px; right: 10px;">Toggle Debug</button>
         
         <form method="POST" id="password-form">
             {{ form.hidden_tag() }}
@@ -81,7 +79,7 @@
             
             {{ form.submit(class="btn") }}
         </form>
-        
+
         {% if password %}
         <div class="result-container">
             <h2>Generated {% if password_type == 'passphrase' %}Passphrase{% else %}Password{% endif %}</h2>
@@ -91,92 +89,70 @@
             </div>
             
             <div class="password-info">
-                <div class="info-item">
-                    <span class="label">Strength:</span>
-                    <span class="value strength-{{ strength.lower() }}">{{ strength }}</span>
-                </div>
-                
-                <div class="info-item">
-                    <span class="label">Entropy:</span>
-                    <span class="value">{{ entropy }} bits</span>
-                </div>
-                
-                <div class="info-item">
-                    <span class="label">Crack Time:</span>
-                    <span class="value">{{ crack_time }}</span>
-                </div>
-                
-                <div class="info-item">
-                    <span class="label">Health Check:</span>
-                    <span class="value">{{ health_report }}</span>
-                </div>
-                
-                {% if breached %}
-                <div class="info-item breached">
-                    <span class="label">⚠️ Security Alert:</span>
-                    <span class="value">This password has been breached!</span>
-                </div>
-                {% endif %}
+                <!-- ... [rest of your info display] ... -->
             </div>
-            
-            {% if qr_code %}
-            <div class="qr-container">
-                <h3>QR Code</h3>
-                <img src="data:image/png;base64,{{ qr_code }}" alt="Password QR Code">
-                <p>Scan to copy password to mobile device</p>
-            </div>
-            {% endif %}
-            
-            <button id="generate-report" class="btn">Generate PDF Report</button>
         </div>
         {% endif %}
-        
-        <div class="live-analysis">
-            <h2>Live Password Analysis</h2>
-            <input type="text" id="live-password" placeholder="Type to analyze...">
-            <div id="live-results">
-                <div class="info-item">
-                    <span class="label">Strength:</span>
-                    <span class="value" id="live-strength">-</span>
-                </div>
-                <div class="info-item">
-                    <span class="label">Entropy:</span>
-                    <span class="value" id="live-entropy">-</span>
-                </div>
-                <div class="info-item">
-                    <span class="label">Health:</span>
-                    <span class="value" id="live-health">-</span>
-                </div>
-            </div>
-        </div>
     </div>
-    
-    <!-- Simple Passphrase Modal -->
+
+    <!-- Passphrase Modal -->
     <div id="passphrase-modal">
         <h3>Your Passphrase</h3>
         <p id="passphrase-content"></p>
-        <button onclick="document.getElementById('passphrase-modal').style.display='none'">OK</button>
+        <button onclick="copyPassphrase()">Copy</button>
+        <button onclick="closeModal()">Close</button>
     </div>
-    
+
+    <!-- Debug Console -->
+    <div id="debug-console">
+        <h4>Debug Console</h4>
+        <div id="debug-output"></div>
+    </div>
+
     <script src="/static/script.js"></script>
     <script>
-        // Show modal when passphrase is generated
-        if ("{{ password_type }}" === 'passphrase' && "{{ password }}") {
-            const modal = document.getElementById('passphrase-modal');
-            modal.style.display = 'block';
-            document.getElementById('passphrase-content').textContent = "{{ password }}";
-            
-            // Also add copy functionality to the modal
-            const copyBtn = document.createElement('button');
-            copyBtn.textContent = 'Copy';
-            copyBtn.style.marginLeft = '10px';
-            copyBtn.onclick = function() {
-                navigator.clipboard.writeText("{{ password }}")
-                    .then(() => alert('Passphrase copied!'))
-                    .catch(err => console.error('Copy failed:', err));
-            };
-            modal.querySelector('p').appendChild(copyBtn);
+        // Debugging
+        console.log("Page loaded");
+        console.log("Password type:", "{{ password_type }}");
+        console.log("Password:", "{{ password }}");
+
+        function logDebug(message) {
+            const debugOutput = document.getElementById('debug-output');
+            debugOutput.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${message}</div>`;
+            debugOutput.scrollTop = debugOutput.scrollHeight;
         }
+
+        document.getElementById('toggle-debug').addEventListener('click', function() {
+            const console = document.getElementById('debug-console');
+            console.style.display = console.style.display === 'none' ? 'block' : 'none';
+        });
+
+        // Passphrase modal handling
+        {% if password_type == 'passphrase' and password %}
+        logDebug("Passphrase detected, showing modal");
+        const modal = document.getElementById('passphrase-modal');
+        const passphrase = "{{ password }}";
+        
+        modal.style.display = 'block';
+        document.getElementById('passphrase-content').textContent = passphrase;
+        
+        function copyPassphrase() {
+            navigator.clipboard.writeText(passphrase)
+                .then(() => {
+                    logDebug("Passphrase copied to clipboard");
+                    alert("Copied to clipboard!");
+                })
+                .catch(err => {
+                    logDebug("Copy failed: " + err);
+                    alert("Copy failed!");
+                });
+        }
+        
+        function closeModal() {
+            modal.style.display = 'none';
+            logDebug("Modal closed");
+        }
+        {% endif %}
     </script>
 </body>
 </html>

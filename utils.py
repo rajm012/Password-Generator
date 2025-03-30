@@ -1,35 +1,55 @@
 import math
 import secrets
 import string
-from datetime import datetime, timedelta
 import nltk
+from nltk.corpus import words
 import random
 
-# Download NLTK words if not available
+# Download word list if needed
 try:
-    from nltk.corpus import words
-    WORDS = words.words()
+    nltk.data.find('corpora/words')
 except:
-    WORDS = [
-        "apple", "banana", "secure", "dragon", "sunshine", "mountain",
-        "ocean", "forest", "keyboard", "guitar", "piano", "castle",
-        "window", "sunset", "coffee", "diamond", "silver", "gold"
-    ]
+    try:
+        nltk.download('words')
+    except:
+        print("Warning: Couldn't download NLTK words corpus")
 
-def generate_passphrase(word_count=4, add_number=True, add_symbol=True):
-    """Generates a secure passphrase with optional numbers and symbols."""
-    # Select unique words
-    words = [secrets.choice(WORDS).capitalize() for _ in range(word_count)]
+def generate_passphrase(word_count=4, separator=' ', capitalize=True):
+    """Generate a memorable passphrase"""
+    print(f"\n=== GENERATING PASSPHRASE ===")
+    print(f"Requested word count: {word_count}")
+    
+    try:
+        # Try using NLTK words
+        word_list = [w.lower() for w in words.words() if 4 <= len(w) <= 8]
+        print(f"Found {len(word_list)} suitable words in NLTK corpus")
+        
+        if len(word_list) < word_count:
+            raise ValueError("Not enough words in corpus")
+            
+        selected = [secrets.choice(word_list) for _ in range(word_count)]
+        print(f"Selected words: {selected}")
+        
+        if capitalize:
+            selected = [w.capitalize() for w in selected]
+            
+        passphrase = separator.join(selected)
+        print(f"Final passphrase: {passphrase}")
+        return passphrase
+        
+    except Exception as e:
+        print(f"Error using NLTK: {str(e)}")
+        # Fallback to built-in words
+        fallback_words = [
+            "apple", "banana", "river", "sunset", "mountain",
+            "coffee", "dragon", "forest", "guitar", "window"
+        ]
+        selected = [secrets.choice(fallback_words) for _ in range(word_count)]
+        if capitalize:
+            selected = [w.capitalize() for w in selected]
+        return separator.join(selected)
 
-    # Optionally add a number
-    if add_number:
-        words.append(str(random.randint(10, 99)))
-
-    # Optionally add a symbol
-    if add_symbol:
-        words.append(secrets.choice("!@#$%^&*()"))
-
-    return " ".join(words)
+# ... [rest of your utility functions] ...
 
 
 def calculate_entropy(password):

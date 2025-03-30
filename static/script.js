@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Dark mode toggle
+    console.log("DOM fully loaded");
     const darkModeToggle = document.getElementById('toggle-dark');
     darkModeToggle.addEventListener('click', () => {
         document.body.classList.toggle('dark-mode');
@@ -19,6 +20,58 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => navigator.clipboard.writeText(''), 10000);
         });
     }
+
+    // Initialize form fields based on password type
+    const passwordTypeRadios = document.querySelectorAll('input[name="password_type"]');
+    
+    // Set initial state
+    const initialType = document.querySelector('input[name="password_type"]:checked').value;
+    updateFormFields(initialType);
+    console.log(`Initial type: ${initialType}`);
+    // Update on change
+
+    passwordTypeRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            updateFormFields(this.value);
+        });
+    });
+
+    // Update on type change
+    document.querySelectorAll('input[name="password_type"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            console.log(`Password type changed to: ${this.value}`);
+            updateFormFields(this.value);
+        });
+    });
+
+    function updateFormFields(type) {
+        console.log(`Updating form for type: ${type}`);
+        const lengthLabel = document.getElementById('length-label');
+        const lengthInput = document.getElementById('length');
+        const digitsCheckbox = document.getElementById('use_digits');
+        const symbolsCheckbox = document.getElementById('use_symbols');
+
+        if (type === 'passphrase') {
+            console.log("Configuring for passphrase");
+            lengthLabel.textContent = 'Number of Words (3-6)';
+            lengthInput.min = 3;
+            lengthInput.max = 6;
+            lengthInput.value = 4;
+            digitsCheckbox.disabled = true;
+            symbolsCheckbox.disabled = true;
+            digitsCheckbox.checked = false;
+            symbolsCheckbox.checked = false;
+        } else {
+            console.log("Configuring for password");
+            lengthLabel.textContent = 'Password Length (8-64)';
+            lengthInput.min = 8;
+            lengthInput.max = 64;
+            lengthInput.value = 12;
+            digitsCheckbox.disabled = false;
+            symbolsCheckbox.disabled = false;
+        }
+    }
+
 
     // Generate PDF report
     if (document.getElementById('generate-report')) {
@@ -91,45 +144,5 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Error:', error);
             });
         });
-    }
-
-    // Initialize form fields based on password type
-    const passwordTypeRadios = document.querySelectorAll('input[name="password_type"]');
-    
-    // Set initial state
-    const initialType = document.querySelector('input[name="password_type"]:checked').value;
-    updateFormFields(initialType);
-    
-    // Update on change
-    passwordTypeRadios.forEach(radio => {
-        radio.addEventListener('change', function() {
-            updateFormFields(this.value);
-        });
-    });
-
-    // Update form fields based on password type selection
-    function updateFormFields(type) {
-        const lengthField = document.getElementById('length');
-        const lengthLabel = document.getElementById('length-label');
-        const digitsField = document.getElementById('use_digits');
-        const symbolsField = document.getElementById('use_symbols');
-
-        if (type === 'passphrase') {
-            lengthLabel.textContent = 'Number of Words (3-6)';
-            lengthField.min = 3;
-            lengthField.max = 6;
-            lengthField.value = 4;
-            digitsField.disabled = true;
-            symbolsField.disabled = true;
-            digitsField.checked = false;
-            symbolsField.checked = false;
-        } else {
-            lengthLabel.textContent = 'Password Length (8-64)';
-            lengthField.min = 8;
-            lengthField.max = 64;
-            lengthField.value = 16;
-            digitsField.disabled = false;
-            symbolsField.disabled = false;
-        }
     }
 });
