@@ -25,15 +25,35 @@
     <main>
         <div class="container">
             <div class="card">
-                <h1><i class="fas fa-key"></i> Secure Password Generator</h1>
+                <h1 class="self-heading"><i class="fas fa-key"></i> Secure Password Generator</h1>
+                <p>Generate strong and secure passwords with ease.</p>
+                <div class="outer-box">
+                <h1 class="passtypes">Password Type</h1>
                 
                 <form method="POST" id="password-form">
                     {{ form.hidden_tag() }}
                     
-                    <div class="form-group">
-                        <label>{{ form.password_type.label }}</label>
-                        {{ form.password_type(class="form-control") }}
+                    <div class="visit-options">
+                        {% for subfield in form.password_type %}
+                        <div class="visit-option">
+                            <label class="radio-container">
+                                {{ subfield }}
+                                <span class="radio-checkmark"></span>
+                                <div class="option-content">
+                                    <h3>{{ subfield.label.text }}</h3>
+                                    <p>
+                                        {% if subfield.data == 'password' %}
+                                        Normal Random Patterns like(urvW#hr*!312)
+                                        {% else %}
+                                        Password using words like(Sun Works Diamond)
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </label>
+                        </div>
+                        {% endfor %}
                     </div>
+                </div>
                     
                     <div class="form-group">
                         <label>{{ form.strength_level.label }}</label>
@@ -141,9 +161,9 @@
     <footer>
         <div class="container footer-content">
             <div class="social-links">
-                <a href="#"><i class="fab fa-github"></i></a>
-                <a href="#"><i class="fab fa-twitter"></i></a>
-                <a href="#"><i class="fab fa-linkedin"></i></a>
+                <a href="https://github.com/rajm012"><i class="fab fa-github"></i></a>
+                <a href="rajmahimaurya@gmail.com"><i class="fab fa-twitter"></i></a>
+                <a href="https://www.linkedin.com/in/raj-maurya-271b32237/"><i class="fab fa-linkedin"></i></a>
             </div>
             <p class="copyright">© 2025 SecurePassGen. All rights reserved.</p>
         </div>
