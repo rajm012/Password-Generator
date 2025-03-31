@@ -75,9 +75,21 @@ document.addEventListener('DOMContentLoaded', function () {
             fetch('/generate-report', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ password, strength, entropy, crack_time: crackTime, health_report: healthReport, breached })
+                body: JSON.stringify({
+                    password, 
+                    strength, 
+                    entropy, 
+                    crack_time: crackTime, 
+                    health_report: healthReport, 
+                    breached 
+                })
             })
-            .then(response => response.blob())
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.error); });
+                }
+                return response.blob();
+            })
             .then(blob => {
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -89,7 +101,7 @@ document.addEventListener('DOMContentLoaded', function () {
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Failed to generate report');
+                alert('Failed to generate report: ' + error.message);
             });
         });
     }

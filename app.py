@@ -16,9 +16,47 @@ from utils import (
 from forms import PasswordForm
 import pdfkit
 
+pdfkit_config = pdfkit.configuration(wkhtmltopdf="C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe")  # Adjust this path if needed
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'supersecretkey'
 HIBP_API_URL = "https://api.pwnedpasswords.com/range/"
+
+
+@app.route("/generate-report", methods=["POST"])
+def generate_report():
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "Invalid data"}), 400
+
+        html = f"""
+        <html>
+            <head><title>Password Security Report</title></head>
+            <body>
+                <h1>Password Security Report</h1>
+                <p><strong>Password:</strong> {data.get('password', 'N/A')}</p>
+                <p><strong>Strength:</strong> {data.get('strength', 'N/A')}</p>
+                <p><strong>Entropy:</strong> {data.get('entropy', 'N/A')} bits</p>
+                <p><strong>Estimated Crack Time:</strong> {data.get('crack_time', 'N/A')}</p>
+                <p><strong>Health Check:</strong> {data.get('health_report', 'N/A')}</p>
+                <p><strong>Breached:</strong> {'Yes' if data.get('breached', False) else 'No'}</p>
+            </body>
+        </html>
+        """
+
+        pdfkit_config = pdfkit.configuration(wkhtmltopdf="C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe")  # Adjust this path
+        pdf = pdfkit.from_string(html, False, configuration=pdfkit_config)
+
+        return send_file(
+            BytesIO(pdf),
+            mimetype="application/pdf",
+            as_attachment=True,
+            download_name="password_report.pdf"
+        )
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 def generate_password(length=12, use_digits=True, use_symbols=True):
     characters = string.ascii_letters
@@ -144,32 +182,6 @@ def live_analysis():
         "health_report": health_report,
         "crack_time": crack_time
     })
-
-@app.route("/generate-report", methods=["POST"])
-def generate_report():
-    data = request.get_json()
-    html = f"""
-    <html>
-        <head><title>Password Security Report</title></head>
-        <body>
-            <h1>Password Security Report</h1>
-            <p><strong>Password:</strong> {data.get('password', '')}</p>
-            <p><strong>Strength:</strong> {data.get('strength', '')}</p>
-            <p><strong>Entropy:</strong> {data.get('entropy', '')} bits</p>
-            <p><strong>Estimated Crack Time:</strong> {data.get('crack_time', '')}</p>
-            <p><strong>Health Check:</strong> {data.get('health_report', '')}</p>
-            <p><strong>Breached:</strong> {'Yes' if data.get('breached', False) else 'No'}</p>
-        </body>
-    </html>
-    """
-
-    pdf = pdfkit.from_string(html, False)
-    return send_file(
-        BytesIO(pdf),
-        mimetype='application/pdf',
-        as_attachment=True,
-        download_name='password_report.pdf'
-    )
 
 if __name__ == "__main__":
     app.run(debug=True)
